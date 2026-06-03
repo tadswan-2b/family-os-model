@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family OS — โมเดลการเงิน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1f3a5f; --blue:#3f6aa6; --lblue:#e9f0fa; --lblue2:#f3f7fc;
+  --ink:#1d2430; --muted:#6b7280; --line:#e3e1d8; --bg:#f6f5f1; --card:#ffffff;
+  --green:#2f7d52; --lgreen:#e7f3ec; --amber:#a8671c; --lamber:#fbf1e2; --red:#b3402e; --lred:#fbeae7;
+  --radius:14px; --shadow:0 1px 3px rgba(20,30,50,.06),0 6px 24px rgba(20,30,50,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun','Tahoma',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+.app{max-width:1180px;margin:0 auto;padding:0 20px 60px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0 16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:42px;height:42px;border-radius:11px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:16px;letter-spacing:.5px}
+.brand h1{font-size:20px;font-weight:700;color:var(--navy);line-height:1.2}
+.brand p{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;background:#ececec;padding:5px;border-radius:12px}
+.tab{border:0;background:transparent;padding:9px 18px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s}
+.tab.active{background:var(--card);color:var(--navy);box-shadow:var(--shadow)}
+.view{display:none;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card .hd{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card .hd h2{font-size:15.5px;font-weight:700;color:var(--navy)}
+.card .hd .sub{font-size:12px;color:var(--muted)}
+.card .bd{padding:14px 18px}
+.sec-title{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--blue);margin:2px 0 10px}
+.irow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.irow:last-of-type{border-bottom:0}
+.colhead{display:flex;align-items:center;gap:8px;padding:0 0 6px;font-size:11px;color:var(--muted);font-weight:600}
+input.f,select.f{font-family:inherit;font-size:13.5px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfcfb;color:var(--ink);transition:.15s}
+input.f{text-align:right}
+input.f:focus,select.f:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px var(--lblue)}
+.f.name{text-align:left;flex:1;min-width:90px}
+.f.amt{width:104px}.f.sm{width:62px}.f.cc{width:118px;text-align:left;font-size:12px}
+select.f{width:108px;text-align:left;cursor:pointer}
+.unit{font-size:11.5px;color:var(--muted);min-width:24px}
+.chk{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.chk input{width:16px;height:16px;accent-color:var(--blue)}
+.del{cursor:pointer;color:var(--muted);border:1px solid var(--line);border-radius:7px;width:28px;height:28px;min-width:28px;display:grid;place-items:center;background:#fff;font-size:13px}
+.del:hover{color:var(--red);border-color:var(--red);background:var(--lred)}
+.addrow{font-size:13px;color:var(--blue);cursor:pointer;font-weight:600;margin-top:10px;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px dashed var(--blue);border-radius:9px}
+.addrow:hover{background:var(--lblue2)}
+.sumline{display:flex;justify-content:space-between;font-weight:700;color:var(--navy);font-size:14px;padding:10px 0 2px;margin-top:6px;border-top:2px solid var(--line)}
+.btn{font-family:inherit;font-weight:600;font-size:14px;border:0;border-radius:10px;padding:11px 22px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--navy);color:#fff}.btn.primary:hover{background:#16304f}
+.btn.ghost{background:var(--card);color:var(--navy);border:1px solid var(--line)}.btn.ghost:hover{background:var(--lblue2)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.cols2{grid-template-columns:1fr 1fr}.cols3{grid-template-columns:repeat(3,1fr)}.cols4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:880px){.cols2,.cols3,.cols4{grid-template-columns:1fr}.tabs{width:100%}.tab{flex:1}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:500}.kpi .v{font-size:24px;font-weight:700;color:var(--navy);margin-top:3px;letter-spacing:-.5px}.kpi .d{font-size:12px;color:var(--muted);margin-top:2px}
+.kpi.accent{background:linear-gradient(180deg,var(--lblue),#fff)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:5px 14px;border-radius:30px}
+.pill.ok{background:var(--lgreen);color:var(--green)}.pill.warn{background:var(--lamber);color:var(--amber)}.pill.bad{background:var(--lred);color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--navy);color:#fff;font-weight:600;font-size:12.5px;border:0}
+thead th:first-child{border-radius:8px 0 0 0}thead th:last-child{border-radius:0 8px 0 0}
+tbody tr:hover{background:var(--lblue2)}
+tr.total td{font-weight:700;background:var(--bg)}
+td.neg{color:var(--red);font-weight:700}td.pos{color:var(--green)}
+.wf{display:flex;flex-direction:column;gap:9px}
+.wf .step{display:flex;align-items:center;gap:14px}
+.wf .bar{height:38px;border-radius:9px;display:flex;align-items:center;padding:0 14px;color:#fff;font-weight:600;font-size:13px;min-width:84px;white-space:nowrap;transition:width .5s ease}
+.wf .meta{font-size:13px;color:var(--muted)}.wf .meta b{color:var(--ink)}
+.rails{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.rail{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--lblue2)}
+.rail.dash{border-style:dashed;border-color:var(--blue)}
+.rail.resid{background:linear-gradient(180deg,var(--lblue),#fff);border-color:var(--blue)}
+.rail .rl{font-size:13px;color:var(--ink);font-weight:700}
+.rail .badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+.rail .rv{font-size:22px;font-weight:700;color:var(--navy);margin-top:4px}
+.rail .rp{font-size:12px;color:var(--blue);font-weight:600}
+.rail .rd{font-size:11.5px;color:var(--muted);margin-top:5px}
+.note{font-size:12.5px;color:var(--muted);background:var(--lblue2);border-left:3px solid var(--blue);padding:9px 13px;border-radius:0 8px 8px 0;margin-top:12px}
+.note.warn{background:var(--lamber);border-color:var(--amber);color:#7a4d14}
+svg text{font-family:'Sarabun','Tahoma',sans-serif}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:9px;z-index:99}
+.toast{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;padding:11px 15px;box-shadow:0 8px 30px rgba(20,30,50,.16);min-width:240px;animation:slideup .25s ease}
+.toast.ok{border-left-color:var(--green)}.toast.warn{border-left-color:var(--amber)}
+.toast .tt{font-weight:700;font-size:13.5px}.toast .td{font-size:12.5px;color:var(--muted)}
+@keyframes slideup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:26px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">F•OS</div>
+      <div><h1>Family OS — โมเดลการเงิน</h1><p>ทุก section เพิ่ม/แก้/ลบรายการได้ · กฎการแบ่งสร้างเองได้ · คำนวณอัตโนมัติ</p></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-v="config" onclick="switchTab('config')">⚙️ ตั้งค่า</button>
+      <button class="tab" data-v="report" onclick="switchTab('report')">📊 รายงาน</button>
+      <button class="tab" data-v="proj" onclick="switchTab('proj')">📈 งบ &amp; Projection</button>
+    </div>
+  </header>
+
+  <section id="config" class="view active">
+    <div class="grid cols2">
+      <div class="card">
+        <div class="hd"><h2>รายจ่าย — Living Cost (ต่อเดือน)</h2><span class="sub">เพิ่ม/ลบรายการได้</span></div>
+        <div class="bd">
+          <div class="colhead"><span class="f name" style="border:0;background:0;padding-left:2px">รายการ</span><span class="f cc" style="border:0;background:0">ศูนย์ต้นทุน</span><span class="f amt" style="border:0;background:0;text-align:right">บาท/เดือน</span><span style="width:28px"></span></div>
+          <div id="opexBox"></div>
+          <span class="addrow" onclick="addItem('opex')">＋ เพิ่มรายการรายจ่าย</span>
+          <div class="sumline"><span>รวม Living</span><span id="opexSum"></span></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card">
+          <div class="hd"><h2>รายรับ — ค่าเช่า (ต่อปี)</h2><span class="sub">เพิ่ม/ลบได้</span></div>
+          <div class="bd">
+            <div id="rentBox"></div>
+            <span class="addrow" onclick="addItem('rent')">＋ เพิ่มทรัพย์ให้เช่า</span>
+            <div class="sumline"><span>รวมค่าเช่า</span><span id="rentSum"></span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="hd"><h2>รายรับ — การลงทุน / ปันผล</h2><span class="sub">เพิ่ม/ลบพอร์ตได้</span></div>
+          <div class="bd">
+            <div class="colhead"><span class="f name" style="border:0;background:0;padding-left:2px">พอร์ต</span><span class="f amt" style="border:0;background:0;text-align:right">มูลค่า</span><span class="f sm" style="border:0;background:0;text-align:right">yield%</span><span style="width:28px"></span></div>
+            <div id="investBox"></div>
+            <span class="addrow" onclick="addItem('invest')">＋ เพิ่มพอร์ตลงทุน</span>
+            <div class="irow" style="border-top:2px solid var(--line);margin-top:6px;padding-top:10px"><span class="f name" style="border:0;background:0">จ่ายปันผลปีละ (งวด)</span><input class="f sm" id="freq" value="2" oninput="upd()"><span class="unit">งวด</span></div>
+            <div class="sumline"><span>ปันผลรวม/ปี</span><span id="investSum"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid cols2" style="margin-top:18px">
+      <div class="card">
+        <div class="hd"><h2>กฎเงินสำรอง &amp; ตัวคูณรวม</h2></div>
+        <div class="bd">
+          <div class="irow"><span class="f name" style="border:0;background:0">เป้า Reserve (เดือนของ opex)</span><input class="f sm" id="resMonths" value="6" oninput="upd()"><span class="unit">เดือน</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">เงินสด Operating ต้นปี</span><input class="f amt" id="startCash" value="300000" oninput="upd()"><span class="unit">บาท</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">Hurdle rate การลงทุน</span><input class="f sm" id="hurdle" value="7" oninput="upd()"><span class="unit">%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>สัดส่วนหุ้นแต่ละบ้าน</h2><span class="sub" id="shareSum"></span></div>
+        <div class="bd">
+          <div id="houseBox"></div>
+          <span class="addrow" onclick="addItem('house')">＋ เพิ่มบ้าน</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>สินทรัพย์ที่ไม่ก่อรายได้ (Store-of-value)</h2><span class="sub">ที่ดินไม่ปล่อยเช่า · ทองคำ · เพชร/เครื่องประดับ — เข้างบดุล ไม่เข้าสูตรรายได้</span></div>
+      <div class="bd">
+        <div class="colhead"><span class="f name" style="border:0;background:0;padding-left:2px">รายการ</span><span class="f amt" style="border:0;background:0;text-align:right">มูลค่า (บาท)</span><span class="f sm" style="border:0;background:0;text-align:right">โต%/ปี</span><span style="width:64px;text-align:center">ที่ดิน/อาคาร</span><span style="width:28px"></span></div>
+        <div id="assetBox"></div>
+        <span class="addrow" onclick="addItem('asset')">＋ เพิ่มสินทรัพย์</span>
+        <div class="sumline"><span>รวมสินทรัพย์ไม่ก่อรายได้</span><span id="assetSum"></span></div>
+        <div class="note">กลุ่มนี้นับใน “มูลค่าสุทธิครอบครัว” และโตตามอัตราที่ตั้งในงบ Projection แต่ไม่สร้างปันผล/รายได้ · ค่าเริ่มต้นเป็นตัวอย่าง ปรับเป็นมูลค่าจริง</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>ค่าใช้จ่ายก่อนภาษี (ลดหย่อนได้)</h2><span class="sub">UBI/เงินเดือน · คนขับรถแม่ · ดูแลแม่ · ประกัน — หักลดภาษี</span></div>
+      <div class="bd">
+        <div class="colhead"><span class="f name" style="border:0;background:0;padding-left:2px">รายการ</span><span class="f amt" style="border:0;background:0;text-align:right">บาท/ปี</span><span style="width:28px"></span></div>
+        <div id="deductBox"></div>
+        <span class="addrow" onclick="addItem('deduct')">＋ เพิ่มค่าใช้จ่ายลดหย่อน</span>
+        <div class="sumline"><span>รวมค่าใช้จ่ายก่อนภาษี</span><span id="deductSum"></span></div>
+        <div class="note warn">ลดภาษีได้เฉพาะรายการที่เป็น “ค่าใช้จ่ายธุรกิจจริง” มีเอกสาร · จ่าย 100 ประหยัดภาษีแค่ ~20 (เสียสุทธิ 80) → คุ้มเฉพาะของที่ครอบครัวต้องการอยู่แล้ว อย่าสร้างรายจ่ายลวงเพื่อเลี่ยงภาษี · ควรให้ที่ปรึกษาภาษีจริงยืนยัน</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>อัตราภาษี &amp; รายจ่ายภาครัฐ</h2><span class="sub">ปรับเพื่อ run simulation</span></div>
+      <div class="bd">
+        <div class="grid cols2">
+          <div class="irow"><span class="f name" style="border:0;background:0">ภาษีที่ดินและสิ่งปลูกสร้าง</span><input class="f sm" id="tLand" value="0.3" oninput="upd()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">ภาษีนิติบุคคล (Family Business)</span><input class="f sm" id="tCorp" value="20" oninput="upd()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">ภาษีเงินได้บุคคล (แม่) effective</span><input class="f sm" id="tPers" value="10" oninput="upd()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">ฐานเงินได้แม่/ปี</span><input class="f amt" id="persBase" value="600000" oninput="upd()"><span class="unit">บาท</span></div>
+        </div>
+        <div class="irow" style="border-top:2px solid var(--line);margin-top:6px;padding-top:10px"><label class="chk" style="white-space:normal"><input type="checkbox" id="divExempt" checked onchange="upd()"> ปันผลรับได้รับยกเว้นภาษีนิติบุคคล (ถือเป็น net profit แล้ว — ไม่นำมารวมฐานภาษี)</label></div>
+        <div class="note">ฐานภาษีนิติบุคคล = ค่าเช่า + (ปันผลถ้าไม่ยกเว้น) − Living opex − ค่าใช้จ่ายก่อนภาษี − ภาษีที่ดิน · ภาษีที่ดิน = อัตรา × (อสังหาก่อรายได้ + สินทรัพย์ติ๊ก “ที่ดิน/อาคาร”) · ฐานเงินได้แม่ตั้งต้น = ค่าเช่า ปรับได้</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>กฎการแบ่ง Optimization Pool</h2><span class="sub">สร้าง/แก้/ลบกฎได้ — ต้องมี 1 กฎเป็นแบบ residual</span></div>
+      <div class="bd">
+        <div class="colhead">
+          <span class="f name" style="border:0;background:0;padding-left:2px">ชื่อกฎ</span>
+          <span class="f" style="border:0;background:0;width:108px">แบบ</span>
+          <span class="f sm" style="border:0;background:0;text-align:right">%</span>
+          <span class="f amt" style="border:0;background:0;text-align:right">floor (บาท)</span>
+          <span class="f sm" style="border:0;background:0;text-align:right">cap%</span>
+          <span style="width:78px;text-align:center">แบ่งตามหุ้น</span>
+          <span style="width:28px"></span>
+        </div>
+        <div id="ruleBox"></div>
+        <span class="addrow" onclick="addItem('rule')">＋ เพิ่มกฎการแบ่ง</span>
+        <div class="note">แบบ <b>%</b> = ได้สัดส่วนเปอร์เซ็นต์ของ pool (ใส่ floor/cap กันร่วง-กันบวมได้) · แบบ <b>residual</b> = ได้เงินที่เหลือทั้งหมดหลังกฎอื่น · ติ๊ก “แบ่งตามหุ้น” เพื่อกระจายเงินกฎนั้นเข้าบ้านตามสัดส่วนหุ้น</div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:20px">
+      <button class="btn primary" onclick="run()">คำนวณ &amp; ดูรายงาน →</button>
+      <button class="btn ghost" onclick="resetAll()">รีเซ็ตค่าเริ่มต้น</button>
+    </div>
+  </section>
+
+  <section id="report" class="view">
+    <div id="statusBar" style="margin-bottom:16px"></div>
+    <div class="grid cols4" id="kpis"></div>
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>ลำดับน้ำไหล (Waterfall)</h2><span class="sub">รายปี</span></div>
+      <div class="bd"><div class="wf" id="wf"></div></div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>สรุปภาษี &amp; รายจ่ายภาครัฐ</h2><span class="sub" id="taxSub"></span></div>
+      <div class="bd"><table id="taxTable"></table><div id="taxNote"></div></div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>Optimization Pool (หลังภาษี) — แตกตามกฎที่ตั้งไว้</h2><span class="sub" id="poolSub"></span></div>
+      <div class="bd"><div class="rails" id="rails"></div><div id="poolNote"></div></div>
+    </div>
+    <div class="grid cols2" style="margin-top:18px">
+      <div class="card">
+        <div class="hd"><h2>กระแสเงินสด Operating 12 เดือน</h2><span class="sub">เช็คเดือนที่เงินขาด</span></div>
+        <div class="bd"><div id="chart"></div>
+          <div class="legend"><span><i style="background:var(--blue)"></i>ยอดคงเหลือ</span><span><i style="background:var(--red)"></i>ติดลบ</span><span><i style="background:var(--green)"></i>เดือนรับปันผล</span></div>
+          <div id="cfNote"></div></div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>แจกเข้าบ้านตามสัดส่วนหุ้น</h2><span class="sub" id="distSub"></span></div>
+        <div class="bd"><table id="distTable"></table><div id="distNote"></div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>ตารางกระแสเงินสดรายเดือน</h2></div>
+      <div class="bd" style="overflow-x:auto"><table id="cfTable"></table></div>
+    </div>
+    <div class="actions" style="margin-top:20px">
+      <button class="btn ghost" onclick="switchTab('config')">← กลับไปแก้ driver</button>
+      <button class="btn primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+    </div>
+  </section>
+
+  <section id="proj" class="view">
+    <div class="card">
+      <div class="hd"><h2>สมมติฐานการคาดการณ์ (Assumptions)</h2><span class="sub">ปรับแล้วอัปเดตทันที</span></div>
+      <div class="bd">
+        <div class="grid cols3">
+          <div class="irow"><span class="f name" style="border:0;background:0">พอร์ตโตต่อปี (capital growth)</span><input class="f sm" id="aGPort" value="4" oninput="renderFin()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">ค่าเช่าปรับขึ้น/ปี</span><input class="f sm" id="aGRent" value="2" oninput="renderFin()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">เงินเฟ้อรายจ่าย/ปี</span><input class="f sm" id="aGOpex" value="3" oninput="renderFin()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">Cap rate ตีมูลค่าอสังหา</span><input class="f sm" id="aCapRate" value="5" oninput="renderFin()"><span class="unit">%</span></div>
+          <div class="irow"><span class="f name" style="border:0;background:0">จำนวนปีที่คาดการณ์</span><input class="f sm" id="aHorizon" value="5" oninput="renderFin()"><span class="unit">ปี</span></div>
+          <div class="irow"><label class="chk" style="white-space:normal"><input type="checkbox" id="aReinvest" checked onchange="renderFin()"> นำราง residual (Investment) กลับเข้าพอร์ต</label></div>
+        </div>
+        <div class="note">พอร์ตโต = ส่วนต่างราคา/ดอกผลสะสม (นอกเหนือปันผลที่จ่ายออก) + เงินจากราง Investment ที่นำกลับเข้าพอร์ต · มูลค่าอสังหาประเมินจาก ค่าเช่า ÷ cap rate (เป็นการประมาณการ ไม่ใช่ราคาประเมินจริง)</div>
+      </div>
+    </div>
+
+    <div class="grid cols4" id="finKpis" style="margin-top:18px"></div>
+
+    <div class="grid cols2" style="margin-top:18px">
+      <div class="card"><div class="hd"><h2>งบกำไรขาดทุน (ปีปัจจุบัน)</h2><span class="sub">Income Statement</span></div><div class="bd"><table id="isTable"></table></div></div>
+      <div class="card"><div class="hd"><h2>งบดุล (ปีปัจจุบัน)</h2><span class="sub">Balance Sheet · ประมาณการ</span></div><div class="bd"><table id="bsTable"></table></div></div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>มูลค่าพอร์ตลงทุน &amp; มูลค่าสุทธิครอบครัว</h2><span class="sub" id="projChartSub"></span></div>
+      <div class="bd"><div id="projChart"></div>
+        <div class="legend"><span><i style="background:var(--blue)"></i>มูลค่าพอร์ต</span><span><i style="background:var(--navy)"></i>มูลค่าสุทธิครอบครัว (equity)</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="hd"><h2>ตารางคาดการณ์รายปี</h2><span class="sub">ปีที่ 3 และ 5 ไฮไลต์</span></div>
+      <div class="bd" style="overflow-x:auto"><table id="projTable"></table></div>
+      <div class="bd" style="padding-top:0"><div id="projNote"></div></div>
+    </div>
+
+    <div class="actions" style="margin-top:20px">
+      <button class="btn ghost" onclick="switchTab('config')">← แก้ driver</button>
+      <button class="btn primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+    </div>
+  </section>
+
+  <div class="foot">Family OS Model · ฉบับร่าง — ทุกตัวเลข/ทุกกฎปรับได้ · จัดทำเพื่อกันความขัดแย้งระหว่างบ้าน</div>
+</div>
+<div id="toasts"></div>
+
+<script>
+const THB = n => Math.round(n).toLocaleString('en-US');
+const $ = id => document.getElementById(id);
+const numEl = id => { const e=$(id); if(!e) return 0; const v=parseFloat((e.value||'').toString().replace(/,/g,'')); return isNaN(v)?0:v; };
+const valEl = (id,d='') => { const e=$(id); return e?e.value:d; };
+const esc = s => (s||'').toString().replace(/"/g,'&quot;');
+
+// ---------- STATE ----------
+const DEFAULTS = () => ({
+  opex:[
+    {name:'มาม่า / ของแห้งสำรอง',cc:'CC-A ครัว',v:10000},
+    {name:'ค่ากับข้าว (2,500×4)',cc:'CC-A ครัว',v:10000},
+    {name:'เครื่องปรุง / ของใช้ครัว',cc:'CC-A ครัว',v:1500},
+    {name:'น้ำดื่ม',cc:'CC-A ครัว',v:4000},
+    {name:'ค่าไฟฟ้า',cc:'CC-B สาธารณูปโภค',v:24000},
+    {name:'ค่าน้ำประปา',cc:'CC-B สาธารณูปโภค',v:1000},
+    {name:'ค่าโทรศัพท์ / เน็ต',cc:'CC-B สาธารณูปโภค',v:1000},
+    {name:'ค่าจ้างแม่บ้าน (16,000×2)',cc:'CC-C ดูแลบ้าน',v:32000},
+    {name:'อุปกรณ์ทำความสะอาด',cc:'CC-C ดูแลบ้าน',v:1500},
+    {name:'ค่าหมอ / ค่ายา',cc:'CC-D สุขภาพ',v:5000},
+    {name:'ค่า MA (สัญญาบำรุงรักษา)',cc:'CC-E ซ่อมบำรุง',v:5000},
+  ],
+  rent:[{name:'บ้านเลขที่ 3',v:420000},{name:'ประตูน้ำพระอินทร์',v:100000},{name:'รังสิตคลอง 13',v:250000},{name:'ทรัพย์ให้เช่าอื่น ๆ',v:650000}],
+  invest:[{name:'พอร์ตลงทุน',v:155000000,y:5}],
+  assets:[
+    {name:'ที่ดิน (ไม่ปล่อยเช่า)',v:100000000,g:3,land:true},
+    {name:'ทองคำ',v:2000000,g:2,land:false},
+    {name:'เพชร / เครื่องประดับ',v:1000000,g:0,land:false},
+  ],
+  deduct:[
+    {name:'เงินเดือน/UBI สมาชิกที่ทำงานจริง',v:1200000},
+    {name:'พนักงานขับรถให้แม่',v:300000},
+    {name:'ค่าดูแล/พยาบาลแม่',v:480000},
+    {name:'ประกันสุขภาพ/ชีวิต (ตามสิทธิ์)',v:360000},
+  ],
+  houses:[{name:'บ้านที่ 1',share:20},{name:'บ้านที่ 2',share:20},{name:'บ้านที่ 3',share:20},{name:'บ้านที่ 4',share:20},{name:'บ้านที่ 5',share:20}],
+  rules:[
+    {name:'Investment',mode:'residual',pct:0,floor:0,capPct:0,byShares:false},
+    {name:'Family Intent (ดูแลแม่)',mode:'percent',pct:15,floor:200000,capPct:25,byShares:false},
+    {name:'แจกเข้าบ้าน',mode:'percent',pct:40,floor:0,capPct:0,byShares:true},
+  ],
+});
+let S = DEFAULTS();
+
+// ---------- READ back from DOM (preserve edits) ----------
+function readAll(){
+  S.opex   = S.opex.map((_,i)=>({name:valEl('opn'+i),cc:valEl('opc'+i),v:numEl('opv'+i)}));
+  S.rent   = S.rent.map((_,i)=>({name:valEl('rtn'+i),v:numEl('rtv'+i)}));
+  S.invest = S.invest.map((_,i)=>({name:valEl('ivn'+i),v:numEl('ivv'+i),y:numEl('ivy'+i)}));
+  S.assets = S.assets.map((_,i)=>({name:valEl('asn'+i),v:numEl('asv'+i),g:numEl('asg'+i),land:$('asl'+i)?$('asl'+i).checked:false}));
+  S.deduct = S.deduct.map((_,i)=>({name:valEl('ddn'+i),v:numEl('ddv'+i)}));
+  S.houses = S.houses.map((_,i)=>({name:valEl('hsn'+i),share:numEl('hss'+i)}));
+  S.rules  = S.rules.map((_,i)=>({name:valEl('rln'+i),mode:valEl('rlm'+i),pct:numEl('rlp'+i),
+                                  floor:numEl('rlf'+i),capPct:numEl('rlc'+i),byShares:$('rlb'+i)?$('rlb'+i).checked:false}));
+}
+
+// ---------- RENDER editable sections ----------
+function renderOpex(){
+  $('opexBox').innerHTML = S.opex.map((o,i)=>`<div class="irow">
+    <input class="f name" id="opn${i}" value="${esc(o.name)}">
+    <input class="f cc" id="opc${i}" value="${esc(o.cc)}">
+    <input class="f amt" id="opv${i}" value="${o.v}" oninput="upd()">
+    <div class="del" onclick="delItem('opex',${i})">✕</div></div>`).join('');
+}
+function renderRent(){
+  $('rentBox').innerHTML = S.rent.map((r,i)=>`<div class="irow">
+    <input class="f name" id="rtn${i}" value="${esc(r.name)}">
+    <input class="f amt" id="rtv${i}" value="${r.v}" oninput="upd()"><span class="unit">/ปี</span>
+    <div class="del" onclick="delItem('rent',${i})">✕</div></div>`).join('');
+}
+function renderInvest(){
+  $('investBox').innerHTML = S.invest.map((iv,i)=>`<div class="irow">
+    <input class="f name" id="ivn${i}" value="${esc(iv.name)}">
+    <input class="f amt" id="ivv${i}" value="${iv.v}" oninput="upd()">
+    <input class="f sm" id="ivy${i}" value="${iv.y}" oninput="upd()"><span class="unit">%</span>
+    <div class="del" onclick="delItem('invest',${i})">✕</div></div>`).join('');
+}
+function renderAssets(){
+  $('assetBox').innerHTML = S.assets.map((a,i)=>`<div class="irow">
+    <input class="f name" id="asn${i}" value="${esc(a.name)}">
+    <input class="f amt" id="asv${i}" value="${a.v}" oninput="upd()">
+    <input class="f sm" id="asg${i}" value="${a.g}" oninput="upd()"><span class="unit">%</span>
+    <label class="chk" style="width:64px;justify-content:center" title="เสียภาษีที่ดิน"><input type="checkbox" id="asl${i}" ${a.land?'checked':''} onchange="upd()"></label>
+    <div class="del" onclick="delItem('asset',${i})">✕</div></div>`).join('');
+}
+function renderDeduct(){
+  $('deductBox').innerHTML = S.deduct.map((d,i)=>`<div class="irow">
+    <input class="f name" id="ddn${i}" value="${esc(d.name)}">
+    <input class="f amt" id="ddv${i}" value="${d.v}" oninput="upd()"><span class="unit">บาท</span>
+    <div class="del" onclick="delItem('deduct',${i})">✕</div></div>`).join('');
+}
+function renderHouses(){
+  $('houseBox').innerHTML = S.houses.map((h,i)=>`<div class="irow">
+    <input class="f name" id="hsn${i}" value="${esc(h.name)}">
+    <input class="f sm" id="hss${i}" value="${h.share}" oninput="upd()"><span class="unit">%</span>
+    <div class="del" onclick="delItem('house',${i})">✕</div></div>`).join('');
+}
+function renderRules(){
+  $('ruleBox').innerHTML = S.rules.map((r,i)=>`<div class="irow">
+    <input class="f name" id="rln${i}" value="${esc(r.name)}">
+    <select class="f" id="rlm${i}" onchange="upd()">
+      <option value="percent" ${r.mode==='percent'?'selected':''}>% ของ pool</option>
+      <option value="residual" ${r.mode==='residual'?'selected':''}>residual</option>
+    </select>
+    <input class="f sm" id="rlp${i}" value="${r.pct}" oninput="upd()">
+    <input class="f amt" id="rlf${i}" value="${r.floor}" oninput="upd()">
+    <input class="f sm" id="rlc${i}" value="${r.capPct}" oninput="upd()">
+    <label class="chk" style="width:78px;justify-content:center"><input type="checkbox" id="rlb${i}" ${r.byShares?'checked':''} onchange="upd()"></label>
+    <div class="del" onclick="delItem('rule',${i})">✕</div></div>`).join('');
+}
+function renderAll(){ renderOpex();renderRent();renderInvest();renderAssets();renderDeduct();renderHouses();renderRules();upd(); }
+
+// ---------- live summaries (no rebuild → keep focus) ----------
+function upd(){
+  readAll();
+  const opexM=S.opex.reduce((a,o)=>a+o.v,0);
+  $('opexSum').textContent=THB(opexM)+' /เดือน · '+THB(opexM*12)+' /ปี';
+  $('rentSum').textContent=THB(S.rent.reduce((a,r)=>a+r.v,0))+' /ปี';
+  $('investSum').textContent=THB(S.invest.reduce((a,iv)=>a+iv.v*iv.y/100,0))+' /ปี';
+  if($('assetSum')) $('assetSum').textContent=THB(S.assets.reduce((a,x)=>a+x.v,0));
+  if($('deductSum')) $('deductSum').textContent=THB(S.deduct.reduce((a,x)=>a+x.v,0))+' /ปี';
+  const ts=S.houses.reduce((a,h)=>a+h.share,0);
+  const el=$('shareSum'); el.textContent='รวม '+ts+'%'; el.style.color=(Math.round(ts)===100)?'var(--green)':'var(--amber)';
+}
+
+// ---------- CRUD ----------
+const BLANK={
+  opex:()=>({name:'รายการใหม่',cc:'CC-?',v:0}),
+  rent:()=>({name:'ทรัพย์ใหม่',v:0}),
+  invest:()=>({name:'พอร์ตใหม่',v:0,y:5}),
+  asset:()=>({name:'สินทรัพย์ใหม่',v:0,g:0,land:false}),
+  deduct:()=>({name:'ค่าใช้จ่ายใหม่',v:0}),
+  house:()=>({name:'บ้านที่ '+(S.houses.length+1),share:0}),
+  rule:()=>({name:'กฎใหม่',mode:'percent',pct:0,floor:0,capPct:0,byShares:false}),
+};
+const KEY={opex:'opex',rent:'rent',invest:'invest',asset:'assets',deduct:'deduct',house:'houses',rule:'rules'};
+function addItem(t){ readAll(); S[KEY[t]].push(BLANK[t]()); renderAll(); toast('เพิ่มรายการแล้ว','info'); }
+function delItem(t,i){
+  readAll(); const k=KEY[t];
+  if((t==='house'||t==='rule') && S[k].length<=1){ toast('ต้องเหลืออย่างน้อย 1 รายการ','warn'); return; }
+  S[k].splice(i,1); renderAll(); toast('ลบแล้ว','info');
+}
+
+// ---------- pool split engine (reused by report + projection) ----------
+function splitPool(pool){
+  const rules=S.rules.map(r=>({...r,amt:0}));
+  let allocated=0;
+  rules.forEach(r=>{ if(r.mode==='percent'){
+    let amt=pool*(r.pct||0)/100;
+    if(r.floor>0) amt=Math.max(amt,r.floor);
+    if(r.capPct>0) amt=Math.min(amt,pool*r.capPct/100);
+    r.amt=amt; allocated+=amt;
+  }});
+  const resid=rules.filter(r=>r.mode==='residual');
+  const remainder=pool-allocated;
+  resid.forEach(r=>r.amt=remainder/resid.length);
+  const residTotal=resid.reduce((a,r)=>a+r.amt,0);
+  const distTotal=rules.filter(r=>r.byShares).reduce((a,r)=>a+r.amt,0);
+  let warn='';
+  if(resid.length && remainder<0) warn='กฎแบบ % รวมเกิน pool → ราง residual ติดลบ ปรับ % หรือ floor ลง';
+  if(!resid.length && Math.abs(remainder)>1) warn='ยังไม่มีกฎแบบ residual — เหลือเงินไม่ถูกจัดสรร '+THB(remainder)+' บาท';
+  return {rules,residTotal,distTotal,warn,unalloc:resid.length?0:remainder};
+}
+
+// ---------- tax engine (reused by report + projection) ----------
+function computeTax(rentY, divY, opexAnnual, propertyBase, persBase, deductExtra){
+  const tLand=numEl('tLand')/100, tCorp=numEl('tCorp')/100, tPers=numEl('tPers')/100;
+  const divExempt=$('divExempt')?$('divExempt').checked:true;
+  const totalInc=rentY+divY;
+  const landTax=Math.max(0,propertyBase)*tLand;
+  const taxableIncome=rentY + (divExempt?0:divY);
+  const corpBase=Math.max(0, taxableIncome - opexAnnual - deductExtra - landTax);
+  const corpTax=corpBase*tCorp;
+  const persTax=Math.max(0,persBase)*tPers;
+  const totalTax=landTax+corpTax+persTax;
+  const operatingSurplus=Math.max(0, totalInc - opexAnnual);
+  const afterTaxPool=Math.max(0, totalInc - opexAnnual - deductExtra - landTax - corpTax - persTax);
+  return {landTax,taxableIncome,corpBase,corpTax,persTax,totalTax,afterTaxPool,operatingSurplus,
+          deductExtra,divExempt, effRate: operatingSurplus>0?totalTax/operatingSurplus:0};
+}
+
+// ---------- COMPUTE ----------
+function compute(){
+  readAll();
+  const opexM=S.opex.reduce((a,o)=>a+o.v,0), opexY=opexM*12;
+  const rentY=S.rent.reduce((a,r)=>a+r.v,0), rentM=rentY/12;
+  const divY=S.invest.reduce((a,iv)=>a+iv.v*iv.y/100,0);
+  const freq=Math.max(1,Math.round(numEl('freq'))), divPay=divY/freq;
+  const totalY=rentY+divY, shortfall=Math.max(0,opexY-rentY);
+  const resTarget=opexM*numEl('resMonths');
+
+  // property base for land tax + taxes
+  const capRate=(numEl('aCapRate')||5)/100;
+  const realEstate=capRate>0?rentY/capRate:0;
+  const landAssetBase=S.assets.filter(a=>a.land).reduce((s,a)=>s+a.v,0);
+  const propertyBase=realEstate+landAssetBase;
+  const persBase=numEl('persBase');
+  const deductExtra=S.deduct.reduce((a,d)=>a+d.v,0);
+  const tax=computeTax(rentY, divY, opexY, propertyBase, persBase, deductExtra);
+
+  const pool=tax.afterTaxPool;            // pool หลังภาษี (เงินที่ครอบครัวจัดสรรได้จริง)
+  const sp=splitPool(pool);
+  const rules=sp.rules, warn=sp.warn, unalloc=sp.unalloc, distTotal=sp.distTotal;
+
+  // 12-month cashflow
+  const months=[]; let bal=numEl('startCash'),minBal=bal,minM=0;
+  const payMonths=[]; for(let k=1;k<=freq;k++) payMonths.push(Math.round(12/freq*k));
+  for(let m=1;m<=12;m++){ let inDiv=payMonths.includes(m)?divPay:0;
+    const open=bal; bal=bal+rentM+inDiv-opexM;
+    months.push({m,open,inRent:rentM,inDiv,out:opexM,close:bal,pay:payMonths.includes(m)});
+    if(bal<minBal){minBal=bal;minM=m;} }
+  let drain=0; for(let m=1;m<payMonths[0];m++) drain+=(opexM-rentM);
+
+  return {opexM,opexY,rentY,rentM,divY,freq,divPay,totalY,shortfall,resTarget,pool,
+          rules,unalloc,warn,distTotal,months,minBal,minM,minBuffer:Math.max(0,drain),
+          payMonths,covRent:opexM?rentM/opexM:0,tax,propertyBase,realEstate,deductExtra};
+}
+
+// ---------- RENDER report ----------
+function render(c){
+  $('statusBar').innerHTML = c.minBal>=0
+    ? `<span class="pill ok">✓ Operation รอด — ยอดต่ำสุดเดือนที่ ${c.minM} = ${THB(c.minBal)} บาท</span>`
+    : `<span class="pill bad">✗ เงินขาดเดือนที่ ${c.minM} (${THB(c.minBal)}) — เพิ่มเงินต้นปีหรือลดรายจ่าย</span>`;
+
+  $('kpis').innerHTML=[
+    ['รายรับรวม/ปี',THB(c.totalY),`เช่า ${THB(c.rentY)} + ปันผล ${THB(c.divY)}`,'accent'],
+    ['ภาษีรวม/ปี',THB(c.tax.totalTax),'อัตรารวม '+(c.tax.effRate*100).toFixed(1)+'% ของกำไรก่อนภาษี',''],
+    ['Pool หลังภาษี',THB(c.pool),'เงินที่ครอบครัวจัดสรรได้จริง','accent'],
+    ['ค่าเช่าคุ้ม Living',Math.round(c.covRent*100)+'%',c.covRent>=1?'ค่าเช่าพอเลี้ยง':'ขาด '+THB(c.shortfall)+'/ปี',''],
+  ].map(k=>`<div class="kpi ${k[3]}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="d">${k[2]}</div></div>`).join('');
+
+  const max=c.totalY||1,w=v=>Math.max(7,Math.round(v/max*100));
+  $('wf').innerHTML=[
+    ['ค่าเช่า → Living','var(--blue)',c.rentY,`เลี้ยง Living (${Math.round(c.covRent*100)}% ของ opex)`],
+    ['ปันผลอุด Living ส่วนขาด','var(--amber)',c.shortfall,`ค่าเช่าไม่พอ ขาด ${THB(c.shortfall)}/ปี`],
+    ['ภาษี &amp; รายจ่ายภาครัฐ','#b3402e',c.tax.totalTax,'ที่ดิน+นิติบุคคล+เงินได้แม่'],
+    ['เติม Reserve (เป้า)','#7a8aa0',c.resTarget,`${numEl('resMonths')} เดือนของ opex`],
+    ['Pool หลังภาษี','var(--navy)',c.pool,'แตกตามกฎด้านล่าง'],
+  ].map(s=>`<div class="step"><div class="bar" style="width:${w(s[2])}%;background:${s[1]}">${THB(s[2])}</div><div class="meta"><b>${s[0]}</b> — ${s[3]}</div></div>`).join('');
+
+  // tax summary
+  const t=c.tax;
+  $('taxSub').textContent='รวม '+THB(t.totalTax)+' บาท/ปี · '+(t.effRate*100).toFixed(1)+'%';
+  $('taxTable').innerHTML=`<thead><tr><th>รายการภาษี</th><th>ฐานคำนวณ</th><th>จำนวน (บาท/ปี)</th></tr></thead><tbody>`
+    +`<tr><td>ภาษีที่ดินและสิ่งปลูกสร้าง</td><td>${THB(c.propertyBase)} @ ${numEl('tLand')}%</td><td>${THB(t.landTax)}</td></tr>`
+    +`<tr><td>ภาษีนิติบุคคล (Family Business)</td><td>ฐาน ${THB(t.corpBase)} @ ${numEl('tCorp')}%</td><td>${THB(t.corpTax)}</td></tr>`
+    +`<tr><td>ภาษีเงินได้บุคคล (แม่)</td><td>${THB(numEl('persBase'))} @ ${numEl('tPers')}%</td><td>${THB(t.persTax)}</td></tr>`
+    +`<tr class="total"><td>รวมภาษีทั้งหมด</td><td>${(t.effRate*100).toFixed(1)}% ของกำไรดำเนินงาน</td><td>${THB(t.totalTax)}</td></tr>`
+    +`<tr><td>ค่าใช้จ่ายก่อนภาษี (ลดหย่อน)</td><td>หักจากฐานภาษีแล้ว</td><td>${THB(t.deductExtra)}</td></tr>`
+    +`<tr class="total"><td>Pool หลังภาษี (เหลือจัดสรร)</td><td>กำไรดำเนินงาน ${THB(t.operatingSurplus)}</td><td>${THB(t.afterTaxPool)}</td></tr></tbody>`;
+  $('taxNote').innerHTML=`<div class="note">${t.divExempt?'ปันผลได้รับยกเว้นภาษีนิติบุคคล (ไม่อยู่ในฐาน) · ':'ปันผลถูกรวมในฐานภาษีนิติบุคคล · '}ฐานภาษีนิติบุคคล = ${THB(t.taxableIncome)} − Living ${THB(c.opexY)} − ลดหย่อน ${THB(t.deductExtra)} − ภาษีที่ดิน ${THB(t.landTax)} = ${THB(t.corpBase)} · เพิ่มค่าใช้จ่ายก่อนภาษี (ของจริง) → ฐานภาษีลด แต่เป็นเงินที่จ่ายออกจริง คุ้มเฉพาะของที่ครอบครัวต้องการ</div>`;
+
+  $('poolSub').textContent='หลังภาษี '+THB(c.pool)+' บาท/ปี';
+  const pct=v=>c.pool>0?Math.round(v/c.pool*100):0;
+  $('rails').innerHTML=c.rules.map(r=>{
+    const cls=r.mode==='residual'?'resid':(r.byShares?'dash':'');
+    const badge=r.mode==='residual'?'residual':(r.byShares?'แบ่งตามหุ้น':'%');
+    let d=[]; if(r.mode==='percent'){ d.push(r.pct+'% ตั้งไว้'); if(r.floor>0)d.push('floor '+THB(r.floor)); if(r.capPct>0)d.push('cap '+r.capPct+'%'); }
+    else d.push('เงินที่เหลือทั้งหมด');
+    return `<div class="rail ${cls}"><div class="rl">${esc(r.name)}<span class="badge">${badge}</span></div>
+      <div class="rv">${THB(r.amt)}</div><div class="rp">${pct(r.amt)}% ของ pool</div><div class="rd">${d.join(' · ')}</div></div>`;
+  }).join('');
+  $('poolNote').innerHTML=c.warn?`<div class="note warn">⚠ ${c.warn}</div>`
+    :`<div class="note">กฎแบบ residual ดูดส่วนต่างจาก floor/cap อัตโนมัติ — ยิ่ง pool โต ทุกกฎโตพร้อมกัน</div>`;
+
+  // distribution
+  const ts=S.houses.reduce((a,h)=>a+h.share,0)||1;
+  $('distSub').textContent='รวม '+THB(c.distTotal)+' บาท';
+  $('distTable').innerHTML=`<thead><tr><th>บ้าน</th><th>หุ้น</th><th>ส่วนแบ่ง (บาท)</th></tr></thead><tbody>`
+    +S.houses.map(h=>`<tr><td>${esc(h.name)}</td><td>${h.share}%</td><td>${THB(c.distTotal*h.share/ts)}</td></tr>`).join('')
+    +`<tr class="total"><td>รวม</td><td>${Math.round(ts)}%</td><td>${THB(c.distTotal)}</td></tr></tbody>`;
+  $('distNote').innerHTML=(Math.round(ts)!==100)?`<div class="note warn">⚠ สัดส่วนหุ้นรวม ${Math.round(ts)}% (ไม่ใช่ 100%) — แบ่งตามสัดส่วนที่กรอก</div>`
+    :(c.distTotal===0?`<div class="note">ยังไม่มีกฎที่ติ๊ก “แบ่งตามหุ้น” — ติ๊กในหน้าตั้งค่าเพื่อให้เงินเข้าบ้าน</div>`:'');
+
+  $('cfTable').innerHTML=`<thead><tr><th>เดือน</th><th>ยอดต้นเดือน</th><th>+ ค่าเช่า</th><th>+ ปันผล</th><th>− รายจ่าย</th><th>ยอดสิ้นเดือน</th></tr></thead><tbody>`
+    +c.months.map(r=>`<tr><td>เดือน ${r.m}${r.pay?' 💰':''}</td><td>${THB(r.open)}</td><td>${THB(r.inRent)}</td><td>${r.inDiv?THB(r.inDiv):'–'}</td><td>${THB(r.out)}</td><td class="${r.close<0?'neg':'pos'}">${THB(r.close)}</td></tr>`).join('')+`</tbody>`;
+  $('cfNote').innerHTML=`<div class="note ${c.minBuffer>numEl('startCash')?'warn':''}">เงินกันชนขั้นต่ำก่อนปันผลงวดแรก (เดือน ${c.payMonths[0]}) = <b>${THB(c.minBuffer)}</b> · เงินสดต้นปี = ${THB(numEl('startCash'))} · เป้า Reserve = ${THB(c.resTarget)}</div>`;
+  drawChart(c.months);
+}
+function drawChart(months){
+  const W=520,H=210,pad=30,bw=W/12*0.62;
+  const vals=months.map(m=>m.close),maxV=Math.max(...vals,0),minV=Math.min(...vals,0),range=(maxV-minV)||1;
+  const y=v=>H-pad-((v-minV)/range)*(H-pad*2),zeroY=y(0);
+  let bars='';
+  months.forEach((m,i)=>{const x=pad+(i+0.5)*((W-pad*1.2)/12)-bw/2,yy=y(m.close),top=Math.min(yy,zeroY),h=Math.abs(yy-zeroY);
+    const col=m.close<0?'var(--red)':(m.pay?'var(--green)':'var(--blue)');
+    bars+=`<rect x="${x}" y="${top}" width="${bw}" height="${Math.max(1,h)}" rx="3" fill="${col}"><title>เดือน ${m.m}: ${THB(m.close)} บาท</title></rect>`;
+    bars+=`<text x="${x+bw/2}" y="${H-pad+14}" font-size="9" fill="var(--muted)" text-anchor="middle">${m.m}</text>`;});
+  $('chart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="กราฟยอดเงิน Operating 12 เดือน">
+    <line x1="${pad}" y1="${zeroY}" x2="${W-6}" y2="${zeroY}" stroke="var(--line)"/>
+    <text x="2" y="${y(maxV)+4}" font-size="9" fill="var(--muted)">${THB(maxV)}</text>
+    <text x="2" y="${y(minV)+4}" font-size="9" fill="var(--muted)">${THB(minV)}</text>${bars}</svg>`;
+}
+
+// ---------- FINANCIALS + PROJECTION ----------
+function buildFinancials(c){
+  const gPort=numEl('aGPort')/100, gRent=numEl('aGRent')/100, gOpex=numEl('aGOpex')/100;
+  const capRate=(numEl('aCapRate')||5)/100;
+  const reinvest=$('aReinvest')?$('aReinvest').checked:true;
+  const H=Math.max(1,Math.min(15,Math.round(numEl('aHorizon')||5)));
+  const port0=S.invest.reduce((a,iv)=>a+iv.v,0);
+  const yieldRate=port0>0?c.divY/port0:0;
+  const realEstate0=capRate>0?c.rentY/capRate:0;
+  const reserve=c.resTarget, opcash=numEl('startCash');
+  const otherAssets0=S.assets.reduce((s,a)=>s+a.v,0);
+  const assets0=opcash+reserve+port0+realEstate0+otherAssets0;
+  // cost-center subtotals (annual) for income statement
+  const ccMap={}; S.opex.forEach(o=>{ccMap[o.cc]=(ccMap[o.cc]||0)+o.v*12;});
+  const cc=Object.entries(ccMap).map(([k,v])=>({k,v}));
+  const persBase0=numEl('persBase');
+  const deductExtra0=S.deduct.reduce((a,d)=>a+d.v,0);
+  // projection
+  const rows=[]; let port=port0, rent=c.rentY, opex=c.opexY;
+  for(let t=1;t<=H;t++){
+    const portStart=port;
+    const div=portStart*yieldRate;
+    rent=rent*(1+gRent); opex=opex*(1+gOpex);
+    const totalInc=div+rent;
+    const re=capRate>0?rent/capRate:0;
+    const otherT=S.assets.reduce((s,a)=>s+a.v*Math.pow(1+(a.g||0)/100,t),0);
+    const landBaseT=re+S.assets.filter(a=>a.land).reduce((s,a)=>s+a.v*Math.pow(1+(a.g||0)/100,t),0);
+    const persBaseT=persBase0*(c.rentY>0?rent/c.rentY:1);
+    const deductT=deductExtra0*Math.pow(1+gOpex,t);
+    const tx=computeTax(rent, div, opex, landBaseT, persBaseT, deductT);
+    const pool=tx.afterTaxPool;
+    const sp=splitPool(pool);
+    const contrib=reinvest?sp.residTotal:0;
+    const grow=portStart*gPort;
+    const portEnd=portStart+grow+contrib;
+    const equity=opcash+reserve+portEnd+re+otherT;
+    rows.push({t,portStart,grow,contrib,portEnd,div,rent,opex,totalInc,pool,tax:tx.totalTax,
+               invest:sp.residTotal,dist:sp.distTotal,other:pool-sp.residTotal-sp.distTotal,re,otherT,equity});
+    port=portEnd;
+  }
+  return {gPort,gRent,gOpex,capRate,reinvest,H,port0,yieldRate,realEstate0,otherAssets0,reserve,opcash,assets0,cc,rows};
+}
+
+function renderFin(){
+  const c=compute();
+  const f=buildFinancials(c);
+  const yr=t=>f.rows.find(r=>r.t===t);
+  const p3=yr(3), p5=yr(5);
+  $('finKpis').innerHTML=[
+    ['พอร์ตปีที่ 3', p3?THB(p3.portEnd):'–', p3?('+'+THB(p3.portEnd-f.port0)+' จากวันนี้'):'เพิ่มปีให้ถึง 3','accent'],
+    ['พอร์ตปีที่ 5', p5?THB(p5.portEnd):'–', p5?('+'+THB(p5.portEnd-f.port0)+' จากวันนี้'):'เพิ่มปีให้ถึง 5','accent'],
+    ['ปันผลปีที่ 5', p5?THB(p5.div):'–', 'จาก yield '+(f.yieldRate*100).toFixed(1)+'%',''],
+    ['มูลค่าสุทธิปีที่ 5', p5?THB(p5.equity):'–', 'พอร์ต+อสังหา+เงินสด',''],
+  ].map(k=>`<div class="kpi ${k[3]}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="d">${k[2]}</div></div>`).join('');
+
+  // Income statement (current year)
+  let isRows=`<thead><tr><th>งบกำไรขาดทุน (บาท/ปี)</th><th></th></tr></thead><tbody>`;
+  isRows+=`<tr><td><b>รายได้</b></td><td></td></tr>`;
+  isRows+=`<tr><td>&nbsp;&nbsp;ค่าเช่า</td><td>${THB(c.rentY)}</td></tr>`;
+  isRows+=`<tr><td>&nbsp;&nbsp;เงินปันผล${c.tax.divExempt?' (ยกเว้นภาษี)':''}</td><td>${THB(c.divY)}</td></tr>`;
+  isRows+=`<tr class="total"><td>รวมรายได้</td><td>${THB(c.totalY)}</td></tr>`;
+  isRows+=`<tr><td><b>ค่าใช้จ่ายดำเนินงาน (Living)</b></td><td></td></tr>`;
+  f.cc.forEach(x=>{ isRows+=`<tr><td>&nbsp;&nbsp;${x.k}</td><td>(${THB(x.v)})</td></tr>`; });
+  isRows+=`<tr class="total"><td>รวมค่าใช้จ่าย Living</td><td>(${THB(c.opexY)})</td></tr>`;
+  isRows+=`<tr class="total"><td>กำไรจากการดำเนินงาน</td><td>${THB(c.tax.operatingSurplus)}</td></tr>`;
+  isRows+=`<tr><td><b>ค่าใช้จ่ายก่อนภาษี (ลดหย่อน)</b></td><td></td></tr>`;
+  S.deduct.forEach(d=>{ isRows+=`<tr><td>&nbsp;&nbsp;${esc(d.name)}</td><td>(${THB(d.v)})</td></tr>`; });
+  if(S.deduct.length===0) isRows+=`<tr><td>&nbsp;&nbsp;(ยังไม่มีรายการ)</td><td>–</td></tr>`;
+  isRows+=`<tr><td><b>ภาษีและรายจ่ายภาครัฐ</b></td><td></td></tr>`;
+  isRows+=`<tr><td>&nbsp;&nbsp;ภาษีที่ดิน</td><td>(${THB(c.tax.landTax)})</td></tr>`;
+  isRows+=`<tr><td>&nbsp;&nbsp;ภาษีนิติบุคคล (ฐาน ${THB(c.tax.corpBase)})</td><td>(${THB(c.tax.corpTax)})</td></tr>`;
+  isRows+=`<tr><td>&nbsp;&nbsp;ภาษีเงินได้บุคคล (แม่)</td><td>(${THB(c.tax.persTax)})</td></tr>`;
+  isRows+=`<tr class="total"><td>คงเหลือสุทธิ (Pool หลังภาษี)</td><td>${THB(c.pool)}</td></tr>`;
+  isRows+=`<tr><td><b>การจัดสรร (Appropriation)</b></td><td></td></tr>`;
+  c.rules.forEach(r=>{ isRows+=`<tr><td>&nbsp;&nbsp;${esc(r.name)}</td><td>(${THB(r.amt)})</td></tr>`; });
+  isRows+=`<tr class="total"><td>คงเหลือหลังจัดสรร</td><td>${THB(c.pool - c.rules.reduce((a,r)=>a+r.amt,0))}</td></tr></tbody>`;
+  $('isTable').innerHTML=isRows;
+
+  // Balance sheet (current)
+  let bs=`<thead><tr><th>งบดุล (บาท)</th><th></th></tr></thead><tbody>`;
+  bs+=`<tr><td><b>สินทรัพย์ก่อรายได้</b></td><td></td></tr>`;
+  bs+=`<tr><td>&nbsp;&nbsp;เงินสด Operating</td><td>${THB(f.opcash)}</td></tr>`;
+  bs+=`<tr><td>&nbsp;&nbsp;เงินสำรอง (Reserve)</td><td>${THB(f.reserve)}</td></tr>`;
+  bs+=`<tr><td>&nbsp;&nbsp;พอร์ตลงทุน</td><td>${THB(f.port0)}</td></tr>`;
+  bs+=`<tr><td>&nbsp;&nbsp;อสังหา (ประเมินจากค่าเช่า)</td><td>${THB(f.realEstate0)}</td></tr>`;
+  bs+=`<tr><td><b>สินทรัพย์ไม่ก่อรายได้</b></td><td></td></tr>`;
+  S.assets.forEach(a=>{ bs+=`<tr><td>&nbsp;&nbsp;${esc(a.name)}</td><td>${THB(a.v)}</td></tr>`; });
+  if(S.assets.length===0) bs+=`<tr><td>&nbsp;&nbsp;(ยังไม่มีรายการ)</td><td>–</td></tr>`;
+  bs+=`<tr class="total"><td>รวมสินทรัพย์</td><td>${THB(f.assets0)}</td></tr>`;
+  bs+=`<tr><td><b>หนี้สิน</b></td><td>${THB(0)}</td></tr>`;
+  bs+=`<tr><td>&nbsp;&nbsp;(ไม่มีหนี้ในข้อมูลปัจจุบัน)</td><td>–</td></tr>`;
+  bs+=`<tr class="total"><td>ส่วนของครอบครัว (Equity)</td><td>${THB(f.assets0)}</td></tr></tbody>`;
+  $('bsTable').innerHTML=bs;
+
+  // projection table
+  let pt=`<thead><tr><th>ปี</th><th>พอร์ตสิ้นปี</th><th>ปันผล</th><th>ค่าเช่า</th><th>รายได้รวม</th><th>ภาษี</th><th>Pool หลังภาษี</th><th>แจกเข้าบ้าน</th><th>มูลค่าสุทธิ</th></tr></thead><tbody>`;
+  pt+=`<tr><td>ปัจจุบัน</td><td>${THB(f.port0)}</td><td>${THB(c.divY)}</td><td>${THB(c.rentY)}</td><td>${THB(c.totalY)}</td><td>${THB(c.tax.totalTax)}</td><td>${THB(c.pool)}</td><td>${THB(c.distTotal)}</td><td>${THB(f.assets0)}</td></tr>`;
+  f.rows.forEach(r=>{ const hi=(r.t===3||r.t===5)?' style="background:var(--lblue)"':'';
+    pt+=`<tr${hi}><td>ปีที่ ${r.t}</td><td><b>${THB(r.portEnd)}</b></td><td>${THB(r.div)}</td><td>${THB(r.rent)}</td><td>${THB(r.totalInc)}</td><td>${THB(r.tax)}</td><td>${THB(r.pool)}</td><td>${THB(r.dist)}</td><td>${THB(r.equity)}</td></tr>`; });
+  pt+=`</tbody>`;
+  $('projTable').innerHTML=pt;
+  $('projNote').innerHTML=`<div class="note">สมมติฐาน: พอร์ตโต ${(f.gPort*100).toFixed(1)}%/ปี + ${f.reinvest?'นำราง Investment กลับเข้าพอร์ต':'ไม่นำกลับเข้าพอร์ต'} · ค่าเช่า +${(f.gRent*100).toFixed(1)}%/ปี · รายจ่าย +${(f.gOpex*100).toFixed(1)}%/ปี · ตัวเลขเป็นประมาณการเชิงวางแผน ไม่ใช่การรับประกันผลตอบแทน`;
+
+  drawProjChart(f, c);
+}
+
+function drawProjChart(f,c){
+  const W=560,H=230,padL=8,padB=24,padT=14;
+  const ports=[f.port0, ...f.rows.map(r=>r.portEnd)];
+  const eq=[f.assets0, ...f.rows.map(r=>r.equity)];
+  const n=ports.length, maxV=Math.max(...eq,1);
+  const x=i=>padL+ i*((W-padL-10)/(n-1||1));
+  const y=v=>H-padB-(v/maxV)*(H-padB-padT);
+  const line=(arr,col,wdt)=>{let d=arr.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+    return `<path d="${d}" fill="none" stroke="${col}" stroke-width="${wdt}"/>`+
+      arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${col}"><title>ปี ${i}: ${THB(v)}</title></circle>`).join('');};
+  let labels=''; for(let i=0;i<n;i++) labels+=`<text x="${x(i)}" y="${H-8}" font-size="9" fill="var(--muted)" text-anchor="middle">${i===0?'ตอนนี้':'ปี'+i}</text>`;
+  $('projChartSub').textContent='พอร์ตวันนี้ '+THB(f.port0)+' → ปีที่ '+f.H+' '+THB(ports[ports.length-1]);
+  $('projChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="กราฟคาดการณ์มูลค่าพอร์ตและมูลค่าสุทธิ">
+    <text x="${padL}" y="${y(maxV)+3}" font-size="9" fill="var(--muted)">${THB(maxV)}</text>
+    ${line(eq,'var(--navy)',2.4)}${line(ports,'var(--blue)',2.4)}${labels}</svg>`;
+}
+
+// ---------- actions ----------
+function switchTab(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id===v));
+  document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('active',e.dataset.v===v));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function run(){ const c=compute(); render(c); switchTab('report');
+  toast('คำนวณเสร็จ','ok','Pool '+THB(c.pool)+' บาท/ปี'+(c.minBal<0?' · ⚠ เงินขาดบางเดือน':'')); }
+function resetAll(){ S=DEFAULTS();
+  $('freq').value=2;$('resMonths').value=6;$('startCash').value=300000;$('hurdle').value=7;
+  $('tLand').value=0.3;$('tCorp').value=20;$('tPers').value=10;$('persBase').value=600000;
+  if($('divExempt'))$('divExempt').checked=true;
+  renderAll(); if($('isTable'))renderFin(); toast('รีเซ็ตค่าเริ่มต้นแล้ว','info'); }
+function toast(tt,kind='info',td=''){ const el=document.createElement('div');
+  el.className='toast '+(kind==='ok'?'ok':kind==='warn'?'warn':'');
+  el.innerHTML=`<div class="tt">${tt}</div>${td?`<div class="td">${td}</div>`:''}`;
+  $('toasts').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(10px)';setTimeout(()=>el.remove(),250);},3000); }
+
+// ---------- init ----------
+renderAll();
+['freq','resMonths','startCash','hurdle'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')run();}));
+render(compute());
+renderFin();
+document.querySelector('.tab[data-v="report"]').addEventListener('click',()=>render(compute()));
+document.querySelector('.tab[data-v="proj"]').addEventListener('click',()=>renderFin());
+['aGPort','aGRent','aGOpex','aCapRate','aHorizon'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')renderFin();}));
+</script>
+</body>
+</html>
